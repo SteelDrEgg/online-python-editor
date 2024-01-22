@@ -1,7 +1,7 @@
 <div align="center">
 
 # Online Python Editor
-![showcase](shocase.png)
+![showcase](showcase.png)
 
 </div>
 
