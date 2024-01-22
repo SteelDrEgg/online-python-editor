@@ -264,11 +264,11 @@
             editor.resize();
         }
 
-        mainPy = new Worker("py-worker.js");
+        mainPy = new Worker("/py-worker.js");
         function run() {
             // console.log("running")
             if (mainPy === undefined) {
-                mainPy = new Worker("py-worker.js");
+                mainPy = new Worker("/py-worker.js");
             }
             let code = editor.getValue();
             document.getElementById("runBtn").onclick = undefined;
@@ -320,7 +320,7 @@
             foreground: '#000000',
             background: '#ffffff',
             selection: '#add2ff',
-            cursor: "#000000",
+            cursor: "#00000080",
         };
         var keyMap = {
             backspace: '\x7F',
@@ -348,7 +348,7 @@ print(f'''Python {sys.version}''')`)
 
         function termRun(code = null) {
             if (mainPy === undefined) {
-                mainPy = new Worker("py-worker.js");
+                mainPy = new Worker("/py-worker.js");
             }
             if (code) {
                 mainPy.postMessage(code)
@@ -366,7 +366,7 @@ print(f'''Python {sys.version}''')`)
         }
 
         term.onKey(e => {
-            console.log(e);
+            // console.log(e);
             if (e.key == keyMap.enter) {
                 // term.write('\n\r>>> ');
                 if (curInput.length > 0) {
