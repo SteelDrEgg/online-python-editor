@@ -327,7 +327,7 @@
         let runSwitchDOM = document.getElementById("runSwitch");
         function switchConsole() {
             if (consoleDOM.style.display == "none") {
-                if (!consoleInit) {
+                if (!consoleInit && document.getElementById("output").value != "") {
                     termRun(`import sys
 print(f'''Python {sys.version}''')`)
                     consoleInit = true;
