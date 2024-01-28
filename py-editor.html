@@ -44,7 +44,7 @@
         .leftBar .bottom {
             display: flex;
             flex-direction: column;
-            justify-content: flex-end;
+            /* justify-content: flex-end; */
             align-items: center;
             flex-grow: 1;
         }
@@ -161,9 +161,22 @@
             border-radius: 25%;
         }
 
-
         .window .toolbar img:last-child {
             filter: none;
+        }
+
+        .window .toolbar select {
+            border: none;
+            outline: none;
+            border-radius: 0.3rem;
+            font-size: 80%;
+            background: transparent;
+            padding: 0.4rem 0.1rem 0.4rem 0.3rem;
+            margin-right: 1rem;
+        }
+
+        .window .toolbar select:hover {
+            background: #d9d9d9;
         }
 
         .window-light {
@@ -233,10 +246,17 @@
                             <span class="title">Console</span>
                         </div>
                         <div class="right">
+                            <select onchange="refreshTerm()" title="select python runtime" id="runtimeSelecter">
+                                <option value="editor">Current Code</option>
+                                <option value="console">Console</option>
+                            </select>
+                            <img title="reload interpreter" id="reloadBtn" onclick="termReload()" src="reload.svg">
                             <img title="Switch layout" id="vertiHoriSwitch" onclick="toggleVertiHori()"
                                 src="/right.svg">
                         </div>
                     </div>
+                    <textarea style="position: absolute;;height: 1rem; width: 50%;" id="output"
+                        disabled>Your browser does not support console</textarea>
                     <div style="width: 100%;height: calc(100% - 2.5rem);" id="terminal"></div>
                 </div>
             </div>
@@ -266,28 +286,40 @@
             editor.resize();
         }
 
-        mainPy = new Worker("/py-worker.js");
-        function run() {
-            // console.log("running")
-            if (mainPy === undefined) {
-                mainPy = new Worker("/py-worker.js");
+        var pythonRuntimes = [];
+        pythonRuntimes.push(new Worker("/py-worker.js"));
+
+        function getMainPy() {
+            if (pythonRuntimes[0] === undefined) {
+                pythonRuntimes[0] = new Worker("/py-worker.js");
             }
+            return pythonRuntimes[0]
+        }
+
+        function run() {
+            let thisPy = getMainPy()
             let code = editor.getValue();
             document.getElementById("runBtn").onclick = undefined;
-            mainPy.postMessage(code)
-            mainPy.onmessage = function (event) {
+            thisPy.postMessage(code)
+            thisPy.onmessage = function (event) {
                 document.getElementById("output").value = event.data;
                 document.getElementById("runBtn").onclick = run;
             }
         }
 
-        function reload() {
-            if (mainPy !== undefined) {
-                mainPy.terminate();
+        function reloadRuntime(index) {
+            if (pythonRuntimes[index] !== undefined) {
+                pythonRuntimes[index].terminate();
+                pythonRuntimes[index] = undefined;
             }
-            mainPy = undefined;
+        }
+
+        function reload() {
+            reloadRuntime(0);
             document.getElementById("output").value = "";
         }
+        run();
+
 
         let outputDOM = document.getElementById("outputWin");
         let consoleDOM = document.getElementById("consoleWin");
@@ -295,6 +327,11 @@
         let runSwitchDOM = document.getElementById("runSwitch");
         function switchConsole() {
             if (consoleDOM.style.display == "none") {
+                if (!consoleInit) {
+                    termRun(`import sys
+print(f'''Python {sys.version}''')`)
+                    consoleInit = true;
+                }
                 outputDOM.style.display = "none";
                 consoleDOM.style.display = "";
                 runSwitchDOM.classList.remove("active")
@@ -317,7 +354,6 @@
         }
     </script>
     <script src="/xterm/lib/xterm.js"></script>
-    <script src="/addon-fit/lib/addon-fit.js"></script>
     <script>
         var lightTheme = {
             foreground: '#000000',
@@ -340,6 +376,8 @@
         var inputs = [];
         var curInput = "";
 
+        var consoleInit = false;
+
         var term = new Terminal({
             cols: parseInt(window.innerWidth * 0.1),
             rows: parseInt(window.innerHeight * 0.017),
@@ -347,20 +385,26 @@
             cursorBlink: true,
         });
         term.open(document.getElementById('terminal'));
-        termRun(`import sys
-print(f'''Python {sys.version}''')`)
 
+        function getTermPy() {
+            if (document.getElementById("runtimeSelecter").value == "editor") {
+                return getMainPy();
+            } else {
+                if (pythonRuntimes[1] === undefined) {
+                    pythonRuntimes[1] = new Worker("/py-worker.js");
+                }
+                return pythonRuntimes[1];
+            }
+        }
 
         function termRun(code = null) {
-            if (mainPy === undefined) {
-                mainPy = new Worker("/py-worker.js");
-            }
+            let thisPy = getTermPy();
             if (code) {
-                mainPy.postMessage(code)
+                thisPy.postMessage(code)
             } else {
-                mainPy.postMessage(inputs[inputs.length - 1])
+                thisPy.postMessage(inputs[inputs.length - 1])
             }
-            mainPy.onmessage = function (event) {
+            thisPy.onmessage = function (event) {
                 for (let line of event.data.split("\n")) {
                     if (line.substr(0, 31) != "Program finished with exit code" || line.length != 33) {
                         term.write("\n\r" + line)
@@ -368,6 +412,21 @@ print(f'''Python {sys.version}''')`)
                 }
                 term.write("\r>>> ")
             }
+        }
+
+        function termReload() {
+            if (document.getElementById("runtimeSelecter").value == "editor") {
+                reloadRuntime(0);
+            } else {
+                reloadRuntime(1);
+            }
+            refreshTerm()
+        }
+
+        function refreshTerm() {
+            term.reset();
+            termRun(`import sys
+print(f'''Python {sys.version}''')`)
         }
 
         term.onKey(e => {
