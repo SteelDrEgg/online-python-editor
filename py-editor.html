@@ -237,7 +237,7 @@
                                 src="/right.svg">
                         </div>
                     </div>
-                    <textarea id="output" disabled></textarea>
+                    <textarea id="output" disabled>Initializing...</textarea>
                 </div>
 
                 <div id="consoleWin" style="display: none;" class="window window-light">
@@ -302,7 +302,16 @@
             document.getElementById("runBtn").onclick = undefined;
             thisPy.postMessage(code)
             thisPy.onmessage = function (event) {
-                document.getElementById("output").value = event.data;
+                if (!mainInit) {
+                    if (event.data.includes("Program finished with exit code 0")) {
+                        document.getElementById("output").value = "Ready!";
+                    } else {
+                        document.getElementById("output").value = event.data;
+                    }
+                    mainInit = true;
+                } else {
+                    document.getElementById("output").value = event.data;
+                }
                 document.getElementById("runBtn").onclick = run;
             }
         }
@@ -318,6 +327,8 @@
             reloadRuntime(0);
             document.getElementById("output").value = "";
         }
+
+        var mainInit = false;
         run();
 
 
