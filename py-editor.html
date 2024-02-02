@@ -264,6 +264,16 @@
     </div>
 
     <script src="/ace/ace.js" type="text/javascript" charset="utf-8"></script>
+
+    <script>
+        const outputWinDOM = document.getElementById("outputWin");
+        const consoleWinDOM = document.getElementById("consoleWin");
+        const consoleSwitchDOM = document.getElementById("consoleSwitch");
+        const runSwitchDOM = document.getElementById("runSwitch");
+        const outputDOM = document.getElementById("output");
+        const runBtnDOM = document.getElementById("runBtn");
+    </script>
+
     <script>
         var editor = ace.edit("editor");
         editor.setTheme("ace/theme/custom");
@@ -299,20 +309,20 @@
         function run() {
             let thisPy = getMainPy()
             let code = editor.getValue();
-            document.getElementById("runBtn").onclick = undefined;
+            runBtnDOM.onclick = undefined;
             thisPy.postMessage(code)
             thisPy.onmessage = function (event) {
                 if (!mainInit) {
                     if (event.data.includes("Program finished with exit code 0")) {
-                        document.getElementById("output").value = "Ready!";
+                        outputDOM.value = "Ready!";
                     } else {
-                        document.getElementById("output").value = event.data;
+                        outputDOM.value = event.data;
                     }
                     mainInit = true;
                 } else {
-                    document.getElementById("output").value = event.data;
+                    outputDOM.value = event.data;
                 }
-                document.getElementById("runBtn").onclick = run;
+                runBtnDOM.onclick = run;
             }
         }
 
@@ -325,41 +335,39 @@
 
         function reload() {
             reloadRuntime(0);
-            document.getElementById("output").value = "";
+            outputDOM.value = "";
         }
 
         var mainInit = false;
         run();
 
-
-        let outputDOM = document.getElementById("outputWin");
-        let consoleDOM = document.getElementById("consoleWin");
-        let consoleSwitchDOM = document.getElementById("consoleSwitch");
-        let runSwitchDOM = document.getElementById("runSwitch");
+        // Switch to console window
         function switchConsole() {
-            if (consoleDOM.style.display == "none") {
-                if (!consoleInit && document.getElementById("output").value != "") {
+            // Init console on first launch
+            if (consoleWinDOM.style.display == "none") {
+                if (!consoleInit && outputDOM.value != "") {
                     termRun(`import sys
 print(f'''Python {sys.version}''')`)
                     consoleInit = true;
                 }
-                outputDOM.style.display = "none";
-                consoleDOM.style.display = "";
+                outputWinDOM.style.display = "none";
+                consoleWinDOM.style.display = "";
                 runSwitchDOM.classList.remove("active")
                 consoleSwitchDOM.classList.add("active")
             } else {
-                consoleDOM.style.display = "none";
+                consoleWinDOM.style.display = "none";
                 consoleSwitchDOM.classList.remove("active")
             }
         }
+        // Switch to run/output window
         function switchRun() {
-            if (outputDOM.style.display == "none") {
-                outputDOM.style.display = "";
-                consoleDOM.style.display = "none";
+            if (outputWinDOM.style.display == "none") {
+                outputWinDOM.style.display = "";
+                consoleWinDOM.style.display = "none";
                 consoleSwitchDOM.classList.remove("active")
                 runSwitchDOM.classList.add("active")
             } else {
-                outputDOM.style.display = "none";
+                outputWinDOM.style.display = "none";
                 runSwitchDOM.classList.remove("active")
             }
         }
@@ -440,10 +448,9 @@ print(f'''Python {sys.version}''')`)
 print(f'''Python {sys.version}''')`)
         }
 
+        // hotkeys and keys
         term.onKey(e => {
-            // console.log(e);
             if (e.key == keyMap.enter) {
-                // term.write('\n\r>>> ');
                 if (curInput.length > 0) {
                     inputs.push(curInput)
                 }
