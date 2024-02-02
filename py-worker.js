@@ -32,7 +32,10 @@ print('''\nProgram finished with exit code 0''')`)
         } catch (err) {
             diagnosis = String(err).split("\n");
             let found = false;
-            result = "Error: Traceback (most recent call last):\n";
+            for (let ele of dialog) {
+                result += ele + "\n";
+            }
+            result += "\nError: Traceback (most recent call last):\n";
             for (let line of diagnosis) {
                 if (found || line.includes('File "<exec>"')) {
                     found = true;

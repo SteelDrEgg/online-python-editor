@@ -200,6 +200,13 @@
             letter-spacing: 1px;
             opacity: 1;
         }
+
+        .highlight-red {
+            position: absolute;
+            border-bottom: 1px solid #db5664;
+            z-index: 10;
+            /* background-color: #db5663b8; */
+        }
     </style>
 </head>
 
@@ -281,6 +288,17 @@
         editor.resize();
         editor.setFontSize(15)
 
+        var Range = ace.require('ace/range').Range
+        var errMarkerID;
+        var errLine;
+
+        editor.session.on('change', function (delta) {
+            if (delta.start.row + 1 == errLine) {
+                editor.session.removeMarker(errMarkerID);
+            }
+            // delta.start, delta.end, delta.lines, delta.action
+        });
+
         function toggleVertiHori() {
             let switchBtn = document.getElementById("vertiHoriSwitch");
             let workzone = document.getElementsByClassName("workzone")[0];
@@ -312,14 +330,30 @@
             runBtnDOM.onclick = undefined;
             thisPy.postMessage(code)
             thisPy.onmessage = function (event) {
-                if (!mainInit) {
-                    if (event.data.includes("Program finished with exit code 0")) {
+                let finishword = event.data.substr(event.data.length - 34, event.data.length);
+                if (!mainInit) { // Go here for init
+                    if (finishword.includes("Program finished with exit code 0")) {
                         outputDOM.value = "Ready!";
                     } else {
                         outputDOM.value = event.data;
                     }
                     mainInit = true;
                 } else {
+                    if (finishword.includes("Program finished with exit code 1")) {
+                        const regex = /Line (\d+)/g;
+                        const matches = event.data.matchAll(regex);
+                        let lastMatch;
+                        for (const match of matches) {
+                            lastMatch = match;
+                        }
+                        if (lastMatch) {
+                            const lineNumber = lastMatch[1];
+                            errLine = lineNumber;
+                            errMarkerID = editor.session.addMarker(new Range(lineNumber - 1, 0, lineNumber, 0), "highlight-red", "text")
+                        } else {
+                            console.log(`No content match, data:\n${event.data}`);
+                        }
+                    }
                     outputDOM.value = event.data;
                 }
                 runBtnDOM.onclick = run;
