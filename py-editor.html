@@ -4,8 +4,8 @@
 <head>
     <title>Python Editor</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/fonts.css">
-    <link rel="stylesheet" href="/xterm/css/xterm.css" />
+    <link rel="stylesheet" href="fonts.css">
+    <link rel="stylesheet" href="vendor/xterm/css/xterm.css" />
     <style type="text/css" media="screen">
         body,
         html {
@@ -244,7 +244,7 @@
                             <img title="reload interpreter" id="reloadBtn" onclick="reload()" src="reload.svg">
                             <img title="run" id="runBtn" onclick="run()" src="run.svg">
                             <img title="Switch layout" id="vertiHoriSwitch" onclick="toggleVertiHori()"
-                                src="/right.svg">
+                                src="right.svg">
                         </div>
                     </div>
                     <textarea id="output" disabled>Initializing...</textarea>
@@ -262,7 +262,7 @@
                             </select>
                             <img title="reload interpreter" id="reloadBtn" onclick="termReload()" src="reload.svg">
                             <img title="Switch layout" id="vertiHoriSwitch" onclick="toggleVertiHori()"
-                                src="/right.svg">
+                                src="right.svg">
                         </div>
                     </div>
                     <textarea style="position: absolute;;height: 1rem; width: 50%;" id="output"
@@ -273,7 +273,7 @@
         </div>
     </div>
 
-    <script src="/ace/ace.js" type="text/javascript" charset="utf-8"></script>
+    <script src="vendor/ace/ace.js" type="text/javascript" charset="utf-8"></script>
 
     <script>
         const outputWinDOM = document.getElementById("outputWin");
@@ -318,11 +318,11 @@
         }
 
         var pythonRuntimes = [];
-        pythonRuntimes.push(new Worker("/py-worker.js"));
+        pythonRuntimes.push(new Worker("py-worker.js"));
 
         function getMainPy() {
             if (pythonRuntimes[0] === undefined) {
-                pythonRuntimes[0] = new Worker("/py-worker.js");
+                pythonRuntimes[0] = new Worker("py-worker.js");
             }
             return pythonRuntimes[0]
         }
@@ -409,7 +409,7 @@ print(f'''Python {sys.version}''')`)
             }
         }
     </script>
-    <script src="/xterm/lib/xterm.js"></script>
+    <script src="vendor/xterm/lib/xterm.js"></script>
     <script>
         var lightTheme = {
             foreground: '#000000',
@@ -447,7 +447,7 @@ print(f'''Python {sys.version}''')`)
                 return getMainPy();
             } else {
                 if (pythonRuntimes[1] === undefined) {
-                    pythonRuntimes[1] = new Worker("/py-worker.js");
+                    pythonRuntimes[1] = new Worker("py-worker.js");
                 }
                 return pythonRuntimes[1];
             }
