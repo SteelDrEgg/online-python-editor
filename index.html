@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Python Editor</title>
+    <link rel="stylesheet" href="fonts.css">
+    <link rel="icon" href="python-svgrepo-com.svg" type="image/svg+xml">
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            font-family: MiSansLatin, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: calc(100vh - 4rem);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .logo {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 1rem;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            color: #2c3e50;
+        }
+        
+        .tagline {
+            font-size: 1.2rem;
+            color: #7f8c8d;
+            margin-bottom: 2rem;
+        }
+        
+        .screenshot {
+            width: 100%;
+            max-width: 800px;
+            border-radius: 8px;
+            /*box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);*/
+            margin-bottom: 2rem;
+        }
+        
+        .features {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+            width: 100%;
+        }
+        
+        .feature {
+            background-color: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            margin: 1rem;
+            flex: 1;
+            min-width: 250px;
+            max-width: 300px;
+        }
+        
+        .feature h3 {
+            color: #3498db;
+            margin-top: 0;
+        }
+        
+        .cta-button {
+            display: inline-block;
+            background-color: #3498db;
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.2rem;
+            transition: background-color 0.3s;
+            margin-top: 1rem;
+        }
+        
+        .cta-button:hover {
+            background-color: #2980b9;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 2rem;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .features {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .feature {
+                margin: 0.5rem 0;
+                min-width: auto;
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="python-svgrepo-com.svg" alt="Python Logo" class="logo">
+            <h1>Online Python Editor</h1>
+            <p class="tagline">Write, run, and experiment with Python code directly in your browser</p>
+        </div>
+        
+        <img src="showcase.png" alt="Online Python Editor Screenshot" class="screenshot">
+        
+        <div class="features">
+            <div class="feature">
+                <h3>No Installation Required</h3>
+                <p>Run Python code instantly in your browser without installing anything. Powered by WebAssembly using Pyodide.</p>
+            </div>
+            <div class="feature">
+                <h3>Code Highlighting</h3>
+                <p>Full syntax highlighting and error reporting with the powerful Ace Editor for a familiar coding experience.</p>
+            </div>
+            <div class="feature">
+                <h3>Interactive Console</h3>
+                <p>Switch between run mode and interactive console for real-time experiments with your Python code.</p>
+            </div>
+        </div>
+        
+        <a href="py-editor.html" class="cta-button">Launch Python Editor</a>
+        
+        <div class="footer">
+            <p>Powered by Pyodide, Ace Editor, and Xterm.js. For educational and development purposes.</p>
+        </div>
+    </div>
+</body>
+</html>
