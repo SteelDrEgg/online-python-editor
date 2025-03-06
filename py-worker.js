@@ -4,6 +4,7 @@ console.log = function () {
 }
 
 let pyodide = undefined;
+
 async function init(resolve, reject) {
     try {
         if (pyodide === undefined) {
@@ -15,6 +16,7 @@ async function init(resolve, reject) {
         reject("Error occured");
     }
 }
+
 let loaded = new Promise(init);
 
 self.onmessage = async function (event) {
@@ -24,11 +26,14 @@ self.onmessage = async function (event) {
         dialog = [];
         try {
             pyodide.runPython(event.data);
-            pyodide.runPython(`
-print('''\nProgram finished with exit code 0''')`)
             for (let ele of dialog) {
                 result += ele + "\n";
             }
+            // Add a status object to the result
+            postMessage({
+                output: result,
+                status: "success"
+            });
         } catch (err) {
             diagnosis = String(err).split("\n");
             let found = false;
@@ -42,10 +47,19 @@ print('''\nProgram finished with exit code 0''')`)
                     result += line.replace('File "<exec>", l', "L") + "\n";
                 }
             }
-            result += "\nProgram finished with exit code 1";
+            // Send error status with the result
+            postMessage({
+                output: result,
+                status: "fail",
+            });
         }
-        postMessage(result);
     }).catch(err => {
-        postMessage("We currently does not support your browser, please update to latest version")
+        postMessage({
+            output: "We currently does not support your browser, please update to latest version",
+            status: "error",
+            errorInfo: {
+                message: String(err)
+            }
+        });
     })
 }
