@@ -81,6 +81,77 @@
     </script>
 
     <script>
+        function PyInterpreter() {
+            this.runtime = new Worker("py-worker.js");
+            if (window.crossOriginIsolated) {
+                this.interruptBuffer = new Uint8Array(new SharedArrayBuffer(1));
+                this.runtime.postMessage({
+                    type: "interruptBuffer",
+                    payload: this.interruptBuffer
+                });
+            } else {
+                console.log("[Error] SharedArrayBuffer is unavailable due to crossOrigin policy")
+            }
+
+            this.run = function (code) {
+                if (window.crossOriginIsolated) {
+                    this.interruptBuffer[0] = 0;
+                }
+                return new Promise((resolve, reject) => {
+                    const onMessage = (event) => {
+                        resolve(event.data);
+                        this.runtime.removeEventListener("message", onMessage);
+                    };
+                    this.runtime.addEventListener("message", onMessage);
+                    this.runtime.postMessage({
+                        type: "code",
+                        payload: code
+                    });
+                });
+            }
+            this.interrupt = function () {
+                if (window.crossOriginIsolated) {
+                    this.interruptBuffer[0] = 2;
+                } else {
+                    this.reload();
+                }
+                outputDOM.value += "\n\nExecution interrupted"
+            }
+            this.reload = function () {
+                this.runtime.terminate();
+                this.runtime = new Worker("py-worker.js");
+                if (window.crossOriginIsolated) {
+                    this.interruptBuffer = new Uint8Array(new SharedArrayBuffer(1));
+                    this.runtime.postMessage({
+                        type: "interruptBuffer",
+                        payload: this.interruptBuffer
+                    });
+                }
+            }
+        }
+
+        var pythonRuntimes = [];
+        function newPy(index = null) {
+            let thisPy = new PyInterpreter();
+            if(index) {
+                if (pythonRuntimes[index] == null) {
+                    pythonRuntimes[index] = thisPy;
+                    return index
+                }
+                console.log(`[caution] error creating python interpreter at ${index}`); // If it's not null, still create
+            }
+            pythonRuntimes.push(thisPy);
+            return pythonRuntimes.length - 1;
+        }
+        function getPy(index) {
+            return pythonRuntimes[index];
+        }
+        function delPy(index) {
+            delete pythonRuntimes[index];
+        }
+    </script>
+
+    <script>
         var editor = ace.edit("editor");
         editor.setTheme("ace/theme/custom");
         editor.session.setMode("ace/mode/python");
@@ -102,7 +173,7 @@
             let outputSwitchBtn = document.getElementById("vertiHoriSwitch");
             let consoleSwitchBtn = document.getElementById("consoleLayoutBtn");
             let workzone = document.getElementsByClassName("workzone")[0];
-            
+
             if (workzone.classList.contains("workzone-vertical")) {
                 workzone.classList.remove("workzone-vertical");
                 outputSwitchBtn.src = "bottom.svg";
@@ -117,35 +188,39 @@
             editor.resize();
         }
 
-        var pythonRuntimes = [];
-        pythonRuntimes.push(new Worker("py-worker.js"));
+        newPy();
 
-        function getMainPy() {
-            if (pythonRuntimes[0] === undefined) {
-                pythonRuntimes[0] = new Worker("py-worker.js");
-            }
-            return pythonRuntimes[0]
+        function stop() {
+            let thisPy = getPy(0);
+            thisPy.interrupt();
+            runBtnDOM.classList.remove("colored");
+            runBtnDOM.src = "run.svg"
+            runBtnDOM.onclick = run;
         }
 
-        function run() {
-            let thisPy = getMainPy()
-            let code = editor.getValue();
-            runBtnDOM.onclick = undefined;
-            if (outputDOM.value!="Initializing...") {
+        async function run() {
+            let thisPy = getPy(0);
+            runBtnDOM.onclick = undefined; // mad man proof
+            let code = `import sys
+print(f'''Python {sys.version}''')`
+            // Verify it's initialized
+            if (mainInit) {
+                code = editor.getValue();
                 runBtnDOM.src = "stop.svg";
                 runBtnDOM.classList.add("colored");
+                runBtnDOM.onclick = stop;
+                outputDOM.value = "Running..."
             }
-            thisPy.postMessage(code)
-            thisPy.onmessage = function (event) {
-                const { output, status, errorInfo } = event.data;
-                
+
+                thisPy.run(code).then((result) => {
+                    const {output, status, errorInfo} = result;
                 if (!mainInit) { // Initial run
                     outputDOM.value = status === "success" ? "Ready!" : output;
                     mainInit = true;
                 } else {
                     // Display the output
                     outputDOM.value = output;
-                    
+
                     // Handle error case
                     if (status === "fail") {
                         outputDOM.value += "\n\nProgram finished with error"
@@ -156,7 +231,7 @@
                         for (const match of matches) {
                             lastMatch = match;
                         }
-                        
+
                         if (lastMatch) {
                             const lineNumber = lastMatch[1];
                             errLine = lineNumber;
@@ -171,13 +246,12 @@
                 runBtnDOM.classList.remove("colored");
                 runBtnDOM.src = "run.svg"
                 runBtnDOM.onclick = run;
-            }
+            })
         }
 
         function reloadRuntime(index) {
             if (pythonRuntimes[index] !== undefined) {
-                pythonRuntimes[index].terminate();
-                pythonRuntimes[index] = undefined;
+                pythonRuntimes[index].reload();
             }
         }
 
@@ -193,18 +267,23 @@
         function switchConsole() {
             // Init console on first launch
             if (consoleWinDOM.style.display == "none") {
-                if (!consoleInit && outputDOM.value != "") {
-                    termRun(`import sys
-print(f'''Python {sys.version}''')`)
+                if (!consoleInit) {
+                    // Initialize the terminal by creating a new interpreter if needed
+                    if (termInterpreterIndex === null) {
+                        termInterpreterIndex = newPy();
+                    }
+                    
+                    // Initialize the terminal display
+                    refreshTerm();
                     consoleInit = true;
                 }
                 outputWinDOM.style.display = "none";
                 consoleWinDOM.style.display = "";
-                runSwitchDOM.classList.remove("active")
-                consoleSwitchDOM.classList.add("active")
+                runSwitchDOM.classList.remove("active");
+                consoleSwitchDOM.classList.add("active");
             } else {
                 consoleWinDOM.style.display = "none";
-                consoleSwitchDOM.classList.remove("active")
+                consoleSwitchDOM.classList.remove("active");
             }
         }
         // Switch to run/output window
@@ -253,68 +332,168 @@ print(f'''Python {sys.version}''')`)
         });
         term.open(document.getElementById('terminal'));
 
-        function getTermPy() {
+        // Store interpreter indices for terminal
+        var termInterpreterIndex = null;
+        var editorInterpreterIndex = 0; // Main editor index
+
+        function getTermPyIndex() {
             if (document.getElementById("runtimeSelecter").value == "editor") {
-                return getMainPy();
+                return editorInterpreterIndex;
             } else {
-                if (pythonRuntimes[1] === undefined) {
-                    pythonRuntimes[1] = new Worker("py-worker.js");
+                if (termInterpreterIndex === null) {
+                    termInterpreterIndex = newPy();
                 }
-                return pythonRuntimes[1];
+                return termInterpreterIndex;
             }
         }
 
-        function termRun(code = null) {
-            let thisPy = getTermPy();
-            if (code) { // use code passed in
-                thisPy.postMessage(code)
-            } else { // read code from terminal
-                thisPy.postMessage(inputs[inputs.length - 1])
-            }
-            thisPy.onmessage = function (event) {
-                const { output, status } = event.data;
-
-                // Display the output
-                const lines = output.split("\n");
-                for (let line of lines) {
-                    term.write("\n\r" + line);
+        async function termRun(code = null) {
+            try {
+                let interpreterIndex = getTermPyIndex();
+                let thisPy = getPy(interpreterIndex);
+                
+                if (!thisPy) {
+                    term.write("\n\r[Error] Python interpreter not available");
+                    term.write("\n\r>>> ");
+                    return;
                 }
-                term.write("\n\r>>> ")
+                
+                if (code) { // use code passed in
+                    // Run the code and get the result
+                    const result = await thisPy.run(code);
+                    
+                    // Display the output
+                    const { output, status } = result;
+                    const lines = output.split("\n");
+                    for (let line of lines) {
+                        term.write("\n\r" + line);
+                    }
+                } else if (inputs.length > 0) { // read code from terminal input history
+                    const result = await thisPy.run(inputs[inputs.length - 1]);
+                    
+                    // Display the output
+                    const { output, status } = result;
+                    const lines = output.split("\n");
+                    for (let line of lines) {
+                        term.write("\n\r" + line);
+                    }
+                }
+                
+                term.write("\n\r>>> ");
+            } catch (error) {
+                console.error("Terminal execution error:", error);
+                term.write("\n\r[Error] Execution failed: " + error.message);
+                term.write("\n\r>>> ");
             }
         }
 
         function termReload() {
-            if (document.getElementById("runtimeSelecter").value == "editor") {
-                reloadRuntime(0);
-            } else {
-                reloadRuntime(1);
+            const interpreterIndex = getTermPyIndex();
+            
+            if (interpreterIndex !== null) {
+                // Get the interpreter and reload it
+                const interpreter = getPy(interpreterIndex);
+                if (interpreter) {
+                    interpreter.reload();
+                    term.reset();
+                    termRun(`import sys\nprint(f'''Python {sys.version}''')`);
+                }
             }
-            refreshTerm()
         }
 
         function refreshTerm() {
             term.reset();
-            termRun(`import sys
-print(f'''Python {sys.version}''')`)
+            termRun(`import sys\nprint(f'''Python {sys.version}''')`);
+        }
+
+        // Command history management
+        const MAX_HISTORY = 50;
+        let historyIndex = 0;
+
+        function addToHistory(cmd) {
+            if (cmd && cmd.trim().length > 0) {
+                // Don't add duplicate consecutive commands
+                if (inputs.length === 0 || cmd !== inputs[inputs.length - 1]) {
+                    inputs.push(cmd);
+                    
+                    // Limit history size
+                    if (inputs.length > MAX_HISTORY) {
+                        inputs.shift();
+                    }
+                }
+            }
+            historyIndex = inputs.length;
+        }
+
+        // Previous command from history
+        function getPreviousCommand() {
+            if (inputs.length > 0 && historyIndex > 0) {
+                historyIndex = Math.max(0, historyIndex - 1);
+                return inputs[historyIndex];
+            }
+            return "";
+        }
+
+        // Next command from history
+        function getNextCommand() {
+            if (inputs.length > 0 && historyIndex < inputs.length - 1) {
+                historyIndex = Math.min(inputs.length - 1, historyIndex + 1);
+                return inputs[historyIndex];
+            }
+            return "";
+        }
+
+        // Interrupt the current execution
+        function interruptExecution() {
+            const interpreterIndex = getTermPyIndex();
+            if (interpreterIndex !== null) {
+                const interpreter = getPy(interpreterIndex);
+                if (interpreter) {
+                    interpreter.interrupt();
+                }
+            }
+            term.write('\n\r>>> ');
+            curInput = "";
+            cmdLength = 0;
+            cursorPosition = 0;
         }
 
         // hotkeys and keys
         term.onKey(e => {
             if (e.key == keyMap.enter) {
                 if (curInput.length > 0) {
-                    inputs.push(curInput)
+                    addToHistory(curInput);
+                    
+                    // Execute the command asynchronously
+                    term.write('\n\r');
+                    
+                    // Store current input
+                    const codeToRun = curInput;
+                    
+                    // Reset input state
+                    curInput = "";
+                    cmdLength = 0;
+                    cursorPosition = 0;
+                    
+                    // Run the command
+                    (async () => {
+                        try {
+                            await termRun(codeToRun);
+                        } catch (error) {
+                            console.error("Terminal command execution failed:", error);
+                            term.write("\n\r[Error] " + error.message);
+                            term.write("\n\r>>> ");
+                        }
+                    })();
+                } else {
+                    // Just print a new prompt if input is empty
+                    term.write("\n\r>>> ");
                 }
-                curInput = "";
-                cmdLength = 0;
-                cursorPosition = 0;
-                traceIndex = 0;
-                termRun();
-                // console.log(inputs);
             } else if (e.key == keyMap.backspace) {
                 if (cursorPosition > 0) {
                     term.write('\b \b')
-                    let head = curInput.substr(0, cursorPosition - 1);
-                    let tail = curInput.substr(cursorPosition, curInput.length);
+                    let head = curInput.substring(0, cursorPosition - 1);
+                    let tail = curInput.substring(cursorPosition);
                     curInput = head + tail;
                     term.write(tail + " ")
                     for (let i = 0; i < tail.length + 1; i++) {
@@ -334,22 +513,42 @@ print(f'''Python {sys.version}''')`)
                     cursorPosition += 1;
                 }
             } else if (e.key == keyMap.up) {
-
+                // Get previous command from history
+                const prevCmd = getPreviousCommand();
+                if (prevCmd !== "") {
+                    // Clear current input
+                    while (cursorPosition > 0) {
+                        term.write('\b \b');
+                        cursorPosition--;
+                    }
+                    // Write the previous command
+                    term.write(prevCmd);
+                    curInput = prevCmd;
+                    cursorPosition = prevCmd.length;
+                    cmdLength = prevCmd.length;
+                }
             } else if (e.key == keyMap.down) {
-
+                // Get next command from history
+                const nextCmd = getNextCommand();
+                // Clear current input
+                while (cursorPosition > 0) {
+                    term.write('\b \b');
+                    cursorPosition--;
+                }
+                // Write the next command or empty string
+                term.write(nextCmd);
+                curInput = nextCmd;
+                cursorPosition = nextCmd.length;
+                cmdLength = nextCmd.length;
             } else if (e.key == keyMap.ctrl_c) {
-                term.write('\n\r>>> ');
-                curInput = "";
-                cmdLength = 0;
-                cursorPosition = 0;
-                traceIndex = 0;
+                interruptExecution();
             } else if (!e.key.includes('\\') || e.key == "\\") { // exclude key combinations
                 if (cursorPosition == curInput.length) { // If it's at the end of this line
                     curInput += e.key;
                     term.write(e.key);
                 } else { // If it's not at the end of this line
-                    let head = curInput.substr(0, cursorPosition);
-                    let tail = curInput.substr(cursorPosition, curInput.length);
+                    let head = curInput.substring(0, cursorPosition);
+                    let tail = curInput.substring(cursorPosition);
                     curInput = head + e.key + tail;
                     term.write(e.key + tail)
                     for (let i = 0; i < tail.length; i++) {

@@ -22,10 +22,15 @@ let loaded = new Promise(init);
 self.onmessage = async function (event) {
     // await loaded
     loaded.then(msg => {
+        if (event.data.type === "interruptBuffer") {
+            pyodide.setInterruptBuffer(msg.data.payload);
+            console.log("here")
+            return;
+        }
         let result = "";
         dialog = [];
         try {
-            pyodide.runPython(event.data);
+            pyodide.runPython(event.data.payload);
             for (let ele of dialog) {
                 result += ele + "\n";
             }
