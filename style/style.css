@@ -151,9 +151,19 @@ html {
 }
 
 .window .toolbar img:hover {
-    background-color: rgba(217, 217, 217, 0.2);
+    background-color: rgba(217, 217, 217, 0.1);
     border-radius: 25%;
 }
+
+.window .toolbar img.colored {
+    filter: none;
+}
+
+.window .toolbar img.colored:hover {
+    background-color: rgba(217, 217, 217, 0.8);
+    border-radius: 25%;
+}
+
 
 .window .toolbar img:last-child {
     filter: none;

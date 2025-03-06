@@ -39,7 +39,7 @@
                         <div class="right">
                             <img title="reload interpreter" id="reloadBtn" onclick="reload()" src="reload.svg">
                             <img title="run" id="runBtn" onclick="run()" src="run.svg">
-                            <img title="Switch layout" id="vertiHoriSwitch" onclick="toggleVertiHori()"
+                            <img title="Switch layout" class="colored" id="vertiHoriSwitch" onclick="toggleVertiHori()"
                                 src="right.svg">
                         </div>
                     </div>
@@ -57,7 +57,7 @@
                                 <option value="console">Console</option>
                             </select>
                             <img title="reload interpreter" id="consoleReloadBtn" onclick="termReload()" src="reload.svg">
-                            <img title="Switch layout" id="consoleLayoutBtn" onclick="toggleVertiHori()"
+                            <img title="Switch layout" class="colored" id="consoleLayoutBtn" onclick="toggleVertiHori()"
                                 src="right.svg">
                         </div>
                     </div>
@@ -131,6 +131,10 @@
             let thisPy = getMainPy()
             let code = editor.getValue();
             runBtnDOM.onclick = undefined;
+            if (outputDOM.value!="Initializing...") {
+                runBtnDOM.src = "stop.svg";
+                runBtnDOM.classList.add("colored");
+            }
             thisPy.postMessage(code)
             thisPy.onmessage = function (event) {
                 const { output, status, errorInfo } = event.data;
@@ -164,7 +168,8 @@
                         outputDOM.value += "\n\nProgram finished"
                     }
                 }
-                
+                runBtnDOM.classList.remove("colored");
+                runBtnDOM.src = "run.svg"
                 runBtnDOM.onclick = run;
             }
         }
@@ -261,9 +266,9 @@ print(f'''Python {sys.version}''')`)
 
         function termRun(code = null) {
             let thisPy = getTermPy();
-            if (code) {
+            if (code) { // use code passed in
                 thisPy.postMessage(code)
-            } else {
+            } else { // read code from terminal
                 thisPy.postMessage(inputs[inputs.length - 1])
             }
             thisPy.onmessage = function (event) {
