@@ -307,11 +307,11 @@
             let workzone = document.getElementsByClassName("workzone")[0];
             if (workzone.classList.contains("workzone-vertical")) {
                 workzone.classList.remove("workzone-vertical");
-                switchBtn.src = switchBtn.src.replace("right.svg", "bottom.svg")
+                switchBtn.src = "bottom.svg"
                 term.resize(parseInt(window.innerWidth * 0.04), parseInt(window.innerHeight * 0.054))
             } else {
                 workzone.classList.add("workzone-vertical");
-                switchBtn.src = switchBtn.src.replace("bottom.svg", "right.svg")
+                switchBtn.src = "right.svg"
                 term.resize(parseInt(window.innerWidth * 0.1), parseInt(window.innerHeight * 0.017))
             }
             editor.resize();
