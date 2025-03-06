@@ -115,7 +115,6 @@
                 } else {
                     this.reload();
                 }
-                outputDOM.value += "\n\nExecution interrupted"
             }
             this.reload = function () {
                 this.runtime.terminate();
@@ -193,11 +192,71 @@
         function stop() {
             let thisPy = getPy(0);
             thisPy.interrupt();
+            
+            // Stop the timer and show interrupted message with elapsed time
+            const executionTime = stopExecutionTimer();
+            outputDOM.value += `\n\nExecution interrupted`;
+            
             runBtnDOM.classList.remove("colored");
             runBtnDOM.src = "run.svg"
             runBtnDOM.onclick = run;
         }
 
+        // Timer for tracking elapsed time
+        let executionTimer = null;
+        let startTime = 0;
+        
+        // Function to update elapsed time display
+        function updateElapsedTime() {
+            if (!startTime) return;
+            
+            const currentTime = performance.now();
+            const elapsedSeconds = (currentTime - startTime) / 1000;
+            
+            // Format the time nicely
+            let timeDisplay;
+            if (elapsedSeconds < 60) {
+                // Less than a minute, show seconds
+                timeDisplay = `${elapsedSeconds.toFixed(1)}s`;
+            } else if (elapsedSeconds < 3600) {
+                // Less than an hour, show minutes and seconds
+                const minutes = Math.floor(elapsedSeconds / 60);
+                const seconds = elapsedSeconds % 60;
+                timeDisplay = `${minutes}m ${seconds.toFixed(1)}s`;
+            } else {
+                // Show hours, minutes, and seconds
+                const hours = Math.floor(elapsedSeconds / 3600);
+                const minutes = Math.floor((elapsedSeconds % 3600) / 60);
+                const seconds = elapsedSeconds % 60;
+                timeDisplay = `${hours}h ${minutes}m ${seconds.toFixed(1)}s`;
+            }
+            
+            outputDOM.value = `Time elapsed ${timeDisplay}`;
+        }
+        
+        // Function to start the timer
+        function startExecutionTimer() {
+            // Clear any existing timer
+            clearInterval(executionTimer);
+            
+            // Set start time and initialize timer
+            startTime = performance.now();
+
+            // Update every 100ms
+            executionTimer = setInterval(updateElapsedTime, 100);
+        }
+        
+        // Function to stop the timer
+        function stopExecutionTimer() {
+            clearInterval(executionTimer);
+            executionTimer = null;
+            
+            // Calculate final time
+            const endTime = performance.now();
+            const totalTime = ((endTime - startTime) / 1000).toFixed(1);
+            return totalTime;
+        }
+        
         async function run() {
             let thisPy = getPy(0);
             runBtnDOM.onclick = undefined; // mad man proof
@@ -209,21 +268,26 @@ print(f'''Python {sys.version}''')`
                 runBtnDOM.src = "stop.svg";
                 runBtnDOM.classList.add("colored");
                 runBtnDOM.onclick = stop;
-                outputDOM.value = "Running..."
+                outputDOM.value = "Time elapsed 0.0s";
+                // Start the real-time timer
+                startExecutionTimer();
             }
 
-                thisPy.run(code).then((result) => {
-                    const {output, status, errorInfo} = result;
+            thisPy.run(code).then((result) => {
+                // Stop the timer and get the final time
+                const executionTime = stopExecutionTimer();
+                
+                const {output, status, errorInfo} = result;
                 if (!mainInit) { // Initial run
                     outputDOM.value = status === "success" ? "Ready!" : output;
                     mainInit = true;
                 } else {
                     // Display the output
-                    outputDOM.value = output;
+                    outputDOM.value += "\n\n" + output;
 
                     // Handle error case
                     if (status === "fail") {
-                        outputDOM.value += "\n\nProgram finished with error"
+                        outputDOM.value += `\n\nProgram finished with error`;
                         // Extract line number from error message
                         const regex = /Line (\d+)/g;
                         const matches = output.matchAll(regex);
@@ -240,7 +304,7 @@ print(f'''Python {sys.version}''')`
                             console.log(`No line number found in error message: ${output}`);
                         }
                     } else {
-                        outputDOM.value += "\n\nProgram finished"
+                        outputDOM.value += `\n\nProgram finished`;
                     }
                 }
                 runBtnDOM.classList.remove("colored");
