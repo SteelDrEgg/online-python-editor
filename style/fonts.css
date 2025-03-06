@@ -1,53 +1,53 @@
 @font-face {
     font-family: MiSansLatin;
-    src: url(font/MiSansLatin-Normal.woff2);
+    src: url(../font/MiSansLatin-Normal.woff2);
     font-weight: normal;
 }
 
 @font-face {
     font-family: MiSansLatin;
-    src: url(font/MiSansLatin-Heavy.woff2);
+    src: url(../font/MiSansLatin-Heavy.woff2);
     font-weight: 900;
 }
 
 @font-face {
     font-family: MiSansLatin;
-    src: url(font/MiSansLatin-Bold.woff2);
+    src: url(../font/MiSansLatin-Bold.woff2);
     font-weight: bold;
 }
 
 @font-face {
     font-family: MiSansLatin;
-    src: url(font/MiSansLatin-Demibold.woff2);
+    src: url(../font/MiSansLatin-Demibold.woff2);
     font-weight: 600;
 }
 
 @font-face {
     font-family: MiSansLatin;
-    src: url(font/MiSansLatin-Medium.woff2);
+    src: url(../font/MiSansLatin-Medium.woff2);
     font-weight: 500;
 }
 
 @font-face {
     font-family: MiSansLatin;
-    src: url(font/MiSansLatin-Regular.woff2);
+    src: url(../font/MiSansLatin-Regular.woff2);
     font-weight: 400;
 }
 
 @font-face {
     font-family: MiSansLatin;
-    src: url(font/MiSansLatin-Light.woff2);
+    src: url(../font/MiSansLatin-Light.woff2);
     font-weight: 300;
 }
 
 @font-face {
     font-family: MiSansLatin;
-    src: url(font/MiSansLatin-ExtraLight.woff2);
+    src: url(../font/MiSansLatin-ExtraLight.woff2);
     font-weight: 200;
 }
 
 @font-face {
     font-family: MiSansLatin;
-    src: url(font/MiSansLatin-Thin.woff2);
+    src: url(../font/MiSansLatin-Thin.woff2);
     font-weight: 100;
 }
