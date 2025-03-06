@@ -24,6 +24,7 @@
                 <div class="bottom">
                     <img id="runSwitch" onclick="switchRun()" class="active" src="python.svg">
                     <img id="consoleSwitch" onclick="switchConsole()" src="terminal.svg">
+                    <img id="settingSwitch" onclick="" src="settings.svg">
                 </div>
             </div>
 
@@ -93,15 +94,46 @@
                 console.log("[Error] SharedArrayBuffer is unavailable due to crossOrigin policy")
             }
 
-            this.run = function (code) {
+            this.run = function (code, onStream) {
                 if (window.crossOriginIsolated) {
                     this.interruptBuffer[0] = 0;
                 }
                 return new Promise((resolve, reject) => {
+                    let outputBuffer = "";
+                    let finalResult = null;
+                    
                     const onMessage = (event) => {
-                        resolve(event.data);
-                        this.runtime.removeEventListener("message", onMessage);
+                        const { status, output } = event.data;
+                        
+                        // For streaming output with "ongoing" status
+                        if (status === "ongoing") {
+                            // Ensure we preserve all newlines in the output
+                            const processedOutput = output.endsWith('\n') ? output : output + '\n';
+                            outputBuffer += processedOutput;
+                            
+                            // Call stream callback if provided
+                            if (onStream && typeof onStream === 'function') {
+                                onStream({
+                                    output: processedOutput,
+                                    accumulatedOutput: outputBuffer
+                                });
+                            }
+                            return; // Keep the listener active
+                        }
+                        
+                        // For final output ("success" or "fail")
+                        if (status === "success" || status === "fail" || status === "error") {
+                            // For final message, include all accumulated output plus the final result
+                            finalResult = {
+                                ...event.data,
+                                // Combine streamed output with any final output
+                                output: outputBuffer + (output || "")
+                            };
+                            resolve(finalResult);
+                            this.runtime.removeEventListener("message", onMessage);
+                        }
                     };
+                    
                     this.runtime.addEventListener("message", onMessage);
                     this.runtime.postMessage({
                         type: "code",
@@ -231,7 +263,11 @@
                 timeDisplay = `${hours}h ${minutes}m ${seconds.toFixed(1)}s`;
             }
             
-            outputDOM.value = `Time elapsed ${timeDisplay}`;
+            // Commented out to avoid resetting the output window
+            // outputDOM.value = `Time elapsed ${timeDisplay}`;
+            
+            // Instead, we'll just store the time value for use at the end
+            window.lastTimeDisplay = timeDisplay;
         }
         
         // Function to start the timer
@@ -268,12 +304,23 @@ print(f'''Python {sys.version}''')`
                 runBtnDOM.src = "stop.svg";
                 runBtnDOM.classList.add("colored");
                 runBtnDOM.onclick = stop;
-                outputDOM.value = "Time elapsed 0.0s";
-                // Start the real-time timer
+                // Clear the output for new execution
+                outputDOM.value = "";
+                // Start the real-time timer (but don't display it in the output)
                 startExecutionTimer();
             }
 
-            thisPy.run(code).then((result) => {
+            // Define streaming output handler
+            const handleStreamedOutput = (streamData) => {
+                // The output should already have newlines preserved from our PyInterpreter.run modifications
+                // Just update the output window with the accumulated content
+                outputDOM.value = streamData.accumulatedOutput;
+                
+                // Auto-scroll to bottom
+                outputDOM.scrollTop = outputDOM.scrollHeight;
+            };
+
+            thisPy.run(code, handleStreamedOutput).then((result) => {
                 // Stop the timer and get the final time
                 const executionTime = stopExecutionTimer();
                 
@@ -282,12 +329,12 @@ print(f'''Python {sys.version}''')`
                     outputDOM.value = status === "success" ? "Ready!" : output;
                     mainInit = true;
                 } else {
-                    // Display the output
-                    outputDOM.value += "\n\n" + output;
+                    // Final output display with execution time
+                    outputDOM.value = output;
 
                     // Handle error case
                     if (status === "fail") {
-                        outputDOM.value += `\n\nProgram finished with error`;
+                        outputDOM.value += `\n\nProgram finished with error in ${executionTime}s`;
                         // Extract line number from error message
                         const regex = /Line (\d+)/g;
                         const matches = output.matchAll(regex);
@@ -304,9 +351,18 @@ print(f'''Python {sys.version}''')`
                             console.log(`No line number found in error message: ${output}`);
                         }
                     } else {
-                        outputDOM.value += `\n\nProgram finished`;
+                        outputDOM.value += `\n\nProgram finished in ${executionTime}s`;
                     }
                 }
+                runBtnDOM.classList.remove("colored");
+                runBtnDOM.src = "run.svg"
+                runBtnDOM.onclick = run;
+            }).catch(error => {
+                // Handle any errors in execution
+                const executionTime = stopExecutionTimer();
+                console.error("Execution error:", error);
+                outputDOM.value += `\n\nExecution error: ${error.message || "Unknown error"}\nTime elapsed: ${executionTime}s`;
+                
                 runBtnDOM.classList.remove("colored");
                 runBtnDOM.src = "run.svg"
                 runBtnDOM.onclick = run;

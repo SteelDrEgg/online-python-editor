@@ -12,6 +12,7 @@ async function init(resolve, reject) {
             pyodide = await loadPyodide();
         }
         resolve("initialized");
+        pyodide.setStdout({ batched: (msg) => std2main(msg) })
     } catch (err) {
         reject("Error occured");
     }
@@ -19,11 +20,20 @@ async function init(resolve, reject) {
 
 let loaded = new Promise(init);
 
+async function std2main(msg){
+    // Ensure we preserve all newlines in the output
+    // Pyodide might replace \n with spaces in some cases
+    postMessage({
+        output: msg,
+        status: "ongoing"
+    });
+}
+
 self.onmessage = async function (event) {
     // await loaded
     loaded.then(msg => {
         if (event.data.type === "interruptBuffer") {
-            pyodide.setInterruptBuffer(msg.data.payload);
+            pyodide.setInterruptBuffer(event.data.payload);
             console.log("here")
             return;
         }
