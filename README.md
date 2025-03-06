@@ -17,7 +17,7 @@ A browser-based Python code editor and execution environment.
 
 ## Live Demo
 
-Try it now: [GitHub Pages Demo](https://github.com/yourusername/online-python-editor)
+Try it now: [GitHub Pages Demo](https://steeldregg.github.io/online-python-editor/py-editor.html)
 
 ## How It Works
 
