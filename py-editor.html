@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="style/fonts.css">
     <link rel="stylesheet" href="style/style.css">
     <link rel="stylesheet" href="style/style-dark.css">
+    <link rel="stylesheet" href="style/style-darcula.css">
     <link rel="stylesheet" href="vendor/xterm/css/xterm.css" />
 
 </head>
@@ -85,6 +86,7 @@
                     <select id="themeSelector" onchange="changeTheme()">
                         <option value="light">Light</option>
                         <option value="dark">Dark</option>
+                        <option value="darcula">Darcula</option>
                     </select>
                 </div>
             </div>
@@ -461,6 +463,13 @@ print(f'''Python {sys.version}''')`
             selection: '#214283',
             cursor: "#bcbec4",
         };
+
+        var darculaTheme = {
+            foreground: '#bbbbbb',
+            background: '#2b2b2b',
+            selection: '#214283',
+            cursor: "#bbbbbb",
+        };
         var keyMap = {
             backspace: '\x7F',
             left: '\x1B[D',
@@ -725,12 +734,21 @@ print(f'''Python {sys.version}''')`
             if (savedTheme) {
                 themeSelector.value = savedTheme;
                 if (savedTheme === 'dark') {
+                    document.body.classList=[];
                     document.body.classList.add('dark');
                     // Also update editor theme for dark mode
                     editor.setTheme("ace/theme/custom_dark");
                     // Update terminal theme
                     term.options.theme = darkTheme;
-                    term.refresh();
+                    term.refresh(0, term.rows - 1);
+                } else if (savedTheme === 'darcula') {
+                    document.body.classList=[];
+                    document.body.classList.add('darcula');
+                    // Also update editor theme for dark mode
+                    editor.setTheme("ace/theme/custom_darcula");
+                    // Update terminal theme
+                    term.options.theme = darculaTheme;
+                    term.refresh(0, term.rows - 1);
                 }
             }
         });
@@ -765,19 +783,28 @@ print(f'''Python {sys.version}''')`
             localStorage.setItem('theme', selectedTheme);
             
             if (selectedTheme === 'dark') {
+                document.body.classList=[];
                 document.body.classList.add('dark');
                 // Update editor theme for dark mode
                 editor.setTheme("ace/theme/custom_dark");
                 // Update terminal theme
                 term.options.theme = darkTheme;
-                term.refresh();
+                term.refresh(0, term.rows - 1);
+            } else if (selectedTheme === 'darcula') {
+                document.body.classList=[];
+                document.body.classList.add('darcula');
+                // Update editor theme for dark mode
+                editor.setTheme("ace/theme/custom_darcula");
+                // Update terminal theme
+                term.options.theme = darculaTheme;
+                term.refresh(0, term.rows - 1);
             } else {
-                document.body.classList.remove('dark');
+                document.body.classList=[];
                 // Restore light theme for editor
                 editor.setTheme("ace/theme/custom");
                 // Restore light theme for terminal
                 term.options.theme = lightTheme;
-                term.refresh();
+                term.refresh(0, term.rows - 1);
             }
         }
     </script>

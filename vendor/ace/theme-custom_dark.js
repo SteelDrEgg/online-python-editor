@@ -5,6 +5,7 @@ ace.define("ace/theme/custom_dark", ["require", "exports", "module", "ace/lib/do
     border-right-width: 1px;
     border-right-style: solid;
     border-right-color: #313438;
+    font-family: "Courier New";
 }
 
 .ace-custom_dark .ace_gutter .ace_gutter-layer {

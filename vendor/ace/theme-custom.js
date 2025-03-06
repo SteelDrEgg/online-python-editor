@@ -5,6 +5,10 @@ ace.define("ace/theme/custom", ["require", "exports", "module", "ace/lib/dom"], 
         color: #adadad;
         border-right: 1px solid #e6e6e6;
         box-sizing: border-box;
+        font-family: "Courier New";
+    }
+    .ace-custom_dark .ace_gutter .ace_gutter-layer {
+        text-align: left;
     }
     .ace-custom .ace_print-margin {
         width: 0px;
