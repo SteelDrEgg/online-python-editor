@@ -6,7 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style/fonts.css">
     <link rel="stylesheet" href="style/style.css">
+    <link rel="stylesheet" href="style/style-dark.css">
     <link rel="stylesheet" href="vendor/xterm/css/xterm.css" />
+
 </head>
 
 <body>
@@ -24,7 +26,7 @@
                 <div class="bottom">
                     <img id="runSwitch" onclick="switchRun()" class="active" src="python.svg">
                     <img id="consoleSwitch" onclick="switchConsole()" src="terminal.svg">
-                    <img id="settingSwitch" onclick="" src="settings.svg">
+                    <img id="settingSwitch" onclick="openSettingsModal()" src="settings.svg">
                 </div>
             </div>
 
@@ -32,7 +34,7 @@
                 <div class="editor-container">
                     <div id="editor"></div>
                 </div>
-                <div id="outputWin" class="window window-light">
+                <div id="outputWin" class="window">
                     <div class="toolbar">
                         <div class="left">
                             <span class="title">Run</span>
@@ -47,7 +49,7 @@
                     <textarea id="output" disabled>Initializing...</textarea>
                 </div>
 
-                <div id="consoleWin" style="display: none;" class="window window-light">
+                <div id="consoleWin" style="display: none;" class="window">
                     <div class="toolbar">
                         <div class="left">
                             <span class="title">Console</span>
@@ -66,6 +68,28 @@
                         disabled>Your browser does not support console</textarea>
                     <div style="width: 100%;height: calc(100% - 2.5rem);" id="terminal"></div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="close">&times;</span>
+                <p>Preferences</p>
+            </div>
+            <div class="modal-body">
+                <div class="settings-row">
+                    <label for="themeSelector">Theme:</label>
+                    <select id="themeSelector" onchange="changeTheme()">
+                        <option value="light">Light</option>
+                        <option value="dark">Dark</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button onclick="closeSettingsModal()">Close</button>
             </div>
         </div>
     </div>
@@ -228,7 +252,8 @@
             // Stop the timer and show interrupted message with elapsed time
             const executionTime = stopExecutionTimer();
             outputDOM.value += `\n\nExecution interrupted`;
-            
+
+            outputDOM.scrollTop = outputDOM.scrollHeight;
             runBtnDOM.classList.remove("colored");
             runBtnDOM.src = "run.svg"
             runBtnDOM.onclick = run;
@@ -263,7 +288,7 @@
                 timeDisplay = `${hours}h ${minutes}m ${seconds.toFixed(1)}s`;
             }
             
-            // Commented out to avoid resetting the output window
+            // This will reset the output window
             // outputDOM.value = `Time elapsed ${timeDisplay}`;
             
             // Instead, we'll just store the time value for use at the end
@@ -354,6 +379,8 @@ print(f'''Python {sys.version}''')`
                         outputDOM.value += `\n\nProgram finished in ${executionTime}s`;
                     }
                 }
+
+                outputDOM.scrollTop = outputDOM.scrollHeight;
                 runBtnDOM.classList.remove("colored");
                 runBtnDOM.src = "run.svg"
                 runBtnDOM.onclick = run;
@@ -426,6 +453,13 @@ print(f'''Python {sys.version}''')`
             background: '#ffffff',
             selection: '#add2ff',
             cursor: "#00000080",
+        };
+        
+        var darkTheme = {
+            foreground: '#bcbec4',
+            background: '#1e1f22',
+            selection: '#214283',
+            cursor: "#bcbec4",
         };
         var keyMap = {
             backspace: '\x7F',
@@ -679,6 +713,73 @@ print(f'''Python {sys.version}''')`
                 cmdLength += 1;
             }
         })
+
+        // Settings modal functions
+        const settingsModal = document.getElementById('settingsModal');
+        const closeBtn = document.querySelector('.close');
+        const themeSelector = document.getElementById('themeSelector');
+        
+        // Initialize the settings when DOM is loaded
+        window.addEventListener('load', function() {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme) {
+                themeSelector.value = savedTheme;
+                if (savedTheme === 'dark') {
+                    document.body.classList.add('dark');
+                    // Also update editor theme for dark mode
+                    editor.setTheme("ace/theme/custom_dark");
+                    // Update terminal theme
+                    term.options.theme = darkTheme;
+                    term.refresh();
+                }
+            }
+        });
+
+        // Open the settings modal
+        function openSettingsModal() {
+            settingsModal.style.display = 'block';
+        }
+
+        // Close the settings modal
+        function closeSettingsModal() {
+            settingsModal.style.display = 'none';
+        }
+
+        // When the user clicks anywhere outside of the modal, close it
+        window.onclick = function(event) {
+            if (event.target === settingsModal) {
+                closeSettingsModal();
+            }
+        }
+
+        // Close the modal when clicking the close button
+        closeBtn.onclick = function() {
+            closeSettingsModal();
+        }
+
+        // Change theme function
+        function changeTheme() {
+            const selectedTheme = themeSelector.value;
+            
+            // Save theme selection to localStorage
+            localStorage.setItem('theme', selectedTheme);
+            
+            if (selectedTheme === 'dark') {
+                document.body.classList.add('dark');
+                // Update editor theme for dark mode
+                editor.setTheme("ace/theme/custom_dark");
+                // Update terminal theme
+                term.options.theme = darkTheme;
+                term.refresh();
+            } else {
+                document.body.classList.remove('dark');
+                // Restore light theme for editor
+                editor.setTheme("ace/theme/custom");
+                // Restore light theme for terminal
+                term.options.theme = lightTheme;
+                term.refresh();
+            }
+        }
     </script>
 </body>
 

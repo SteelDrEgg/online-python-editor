@@ -1,0 +1,95 @@
+/* Dark theme */
+body.dark {
+    background-color: #2b2b2b;
+    color: #a9b7c6;
+}
+
+body.dark .window {
+    background-color: #252526;
+    color: #dfe1e5;
+    border-color: #1e1f22;
+}
+
+body.dark .window .toolbar {
+    background-color: #2b2d30;
+    border-bottom-color: #1e1f22;
+}
+
+body.dark .window .toolbar .title {
+    color: #dfe1e5;
+}
+
+body.dark .topbar,
+body.dark .leftBar {
+    background-color: #2b2d30;
+    border-color: #1e1f22;
+}
+
+body.dark .leftBar img {
+    filter: invert(100%);
+}
+body.dark .leftBar img:hover {
+    background-color: rgba(96, 96, 96, 0.3);
+}
+body.dark .leftBar img.active:hover {
+    background-color: rgba(219, 123, 15, 0.7);
+}
+
+body.dark #output {
+    background-color: #1e1f22;
+    color: #bcbec4;
+}
+
+body.dark .window .toolbar img:hover {
+    background-color: rgba(96, 96, 96, 0.3);
+    border-radius: 25%;
+}
+
+body.dark .window .toolbar img.colored:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 25%;
+}
+
+body.dark .workzone .window {
+    border-left-color: #393b40;
+}
+body.dark .workzone-vertical .window {
+    border-left-color: unset;
+}
+
+body.dark .window .toolbar select {
+    color: #dfe1e5;
+}
+
+body.dark .window .toolbar select:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* Dark theme for modal */
+body.dark .modal-header p {
+    color: #a4a4a6;
+}
+body.dark .modal-content {
+    background-color: #2b2d30;
+    color: #e6e8ec;
+}
+
+body.dark .modal-header,
+body.dark .modal-footer {
+    border-color: #3b3d43;
+}
+
+body.dark .settings-row select {
+    background-color: #393b40;
+    color: #e5e8ec;
+    border-color: #4d5056;
+}
+
+body.dark .modal-footer button {
+    background-color: #2b2d30;
+    color: #e5e7ec;
+    outline-color: #4e5157;
+}
+body.dark .modal-footer button:active {
+    outline-color: #3574f0;
+}
