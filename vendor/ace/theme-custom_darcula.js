@@ -107,7 +107,7 @@ ace.define("ace/theme/custom_darcula", ["require", "exports", "module", "ace/lib
 }
 /* class */
 [class="ace_variable ace_language"] {
-    color: #72737a !important;
+    color: #94558d !important;
 }
 
 .ace-custom_darcula .ace_support.ace_class,

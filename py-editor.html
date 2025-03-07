@@ -25,9 +25,9 @@
                 </div>
 
                 <div class="bottom">
-                    <img id="runSwitch" onclick="switchRun()" class="active" src="python.svg">
-                    <img id="consoleSwitch" onclick="switchConsole()" src="terminal.svg">
-                    <img id="settingSwitch" onclick="openSettingsModal()" src="settings.svg">
+                    <img id="runSwitch" onclick="switchRun()" class="active" src="assets/python.svg">
+                    <img id="consoleSwitch" onclick="switchConsole()" src="assets/terminal.svg">
+                    <img id="settingSwitch" onclick="openSettingsModal()" src="assets/settings.svg">
                 </div>
             </div>
 
@@ -41,10 +41,10 @@
                             <span class="title">Run</span>
                         </div>
                         <div class="right">
-                            <img title="reload interpreter" id="reloadBtn" onclick="reload()" src="reload.svg">
-                            <img title="run" id="runBtn" onclick="run()" src="run.svg">
+                            <img title="reload interpreter" id="reloadBtn" onclick="reload()" src="assets/reload.svg">
+                            <img title="run" id="runBtn" onclick="run()" src="assets/run.svg">
                             <img title="Switch layout" class="colored" id="vertiHoriSwitch" onclick="toggleVertiHori()"
-                                src="right.svg">
+                                src="assets/right.svg">
                         </div>
                     </div>
                     <textarea id="output" disabled>Initializing...</textarea>
@@ -60,9 +60,9 @@
                                 <option value="editor">Current Code</option>
                                 <option value="console">Console</option>
                             </select>
-                            <img title="reload interpreter" id="consoleReloadBtn" onclick="termReload()" src="reload.svg">
+                            <img title="reload interpreter" id="consoleReloadBtn" onclick="termReload()" src="assets/reload.svg">
                             <img title="Switch layout" class="colored" id="consoleLayoutBtn" onclick="toggleVertiHori()"
-                                src="right.svg">
+                                src="assets/right.svg">
                         </div>
                     </div>
                     <textarea style="position: absolute;;height: 1rem; width: 50%;" id="consoleOutput"
@@ -233,13 +233,13 @@
 
             if (workzone.classList.contains("workzone-vertical")) {
                 workzone.classList.remove("workzone-vertical");
-                outputSwitchBtn.src = "bottom.svg";
-                consoleSwitchBtn.src = "bottom.svg";
+                outputSwitchBtn.src = "assets/bottom.svg";
+                consoleSwitchBtn.src = "assets/bottom.svg";
                 term.resize(parseInt(window.innerWidth * 0.04), parseInt(window.innerHeight * 0.05))
             } else {
                 workzone.classList.add("workzone-vertical");
-                outputSwitchBtn.src = "right.svg";
-                consoleSwitchBtn.src = "right.svg";
+                outputSwitchBtn.src = "assets/right.svg";
+                consoleSwitchBtn.src = "assets/right.svg";
                 term.resize(parseInt(window.innerWidth * 0.1), parseInt(window.innerHeight * 0.017))
             }
             editor.resize();
@@ -257,7 +257,7 @@
 
             outputDOM.scrollTop = outputDOM.scrollHeight;
             runBtnDOM.classList.remove("colored");
-            runBtnDOM.src = "run.svg"
+            runBtnDOM.src = "assets/run.svg"
             runBtnDOM.onclick = run;
         }
 
@@ -328,7 +328,7 @@ print(f'''Python {sys.version}''')`
             // Verify it's initialized
             if (mainInit) {
                 code = editor.getValue();
-                runBtnDOM.src = "stop.svg";
+                runBtnDOM.src = "assets/stop.svg";
                 runBtnDOM.classList.add("colored");
                 runBtnDOM.onclick = stop;
                 // Clear the output for new execution
@@ -384,7 +384,7 @@ print(f'''Python {sys.version}''')`
 
                 outputDOM.scrollTop = outputDOM.scrollHeight;
                 runBtnDOM.classList.remove("colored");
-                runBtnDOM.src = "run.svg"
+                runBtnDOM.src = "assets/run.svg"
                 runBtnDOM.onclick = run;
             }).catch(error => {
                 // Handle any errors in execution
@@ -393,7 +393,7 @@ print(f'''Python {sys.version}''')`
                 outputDOM.value += `\n\nExecution error: ${error.message || "Unknown error"}\nTime elapsed: ${executionTime}s`;
                 
                 runBtnDOM.classList.remove("colored");
-                runBtnDOM.src = "run.svg"
+                runBtnDOM.src = "assets/run.svg"
                 runBtnDOM.onclick = run;
             })
         }
