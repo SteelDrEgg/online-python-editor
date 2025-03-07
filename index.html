@@ -3,161 +3,853 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Online Python Editor</title>
+    <title>Online Python Editor - Run Python in Your Browser</title>
+    <link rel="icon" href="python.svg" type="image/svg+xml">
     <link rel="stylesheet" href="style/fonts.css">
-    <link rel="icon" href="python-svgrepo-com.svg" type="image/svg+xml">
     <style>
-        body, html {
-            height: 100%;
+        :root {
+            --primary-color: #306998;
+            --secondary-color: #FFD43B;
+            --dark-color: #1a1a1a;
+            --light-color: #f5f5f5;
+            --text-color: #333;
+            --text-light: #f5f5f5;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --radius: 8px;
+            --transition: all 0.3s ease;
+            --card-bg: white;
+            --border-color: #e0e0e0;
+        }
+
+        body {
+            font-family: 'MiSansLatin', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             margin: 0;
             padding: 0;
-            font-family: MiSansLatin, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-            background-color: #f5f5f5;
-            color: #333;
+            background-color: var(--light-color);
+            color: var(--text-color);
+            line-height: 1.5;
+            overflow-x: hidden;
+        }
+
+        body.dark-theme {
+            --primary-color: #4889c0;
+            --text-color: #f5f5f5;
+            --light-color: #1e1e1e;
+            --dark-color: #121212;
+            --card-bg: #2a2a2a;
+            --border-color: #444;
+            background-color: var(--dark-color);
+        }
+
+        .theme-switch-wrapper {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
         
-        .container {
-            max-width: 1200px;
+        .theme-icon {
+            width: 16px;
+            height: 16px;
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            transition: opacity 0.4s ease;
+        }
+        
+        .light-icon {
+            left: 6px;
+            z-index: 1;
+        }
+        
+        .dark-icon {
+            right: 6px;
+            z-index: 1;
+        }
+        
+        /* Show both icons always, but with different opacities */
+        body.dark-theme .light-icon {
+            opacity: 0.3;
+        }
+        
+        body.dark-theme .dark-icon {
+            opacity: 1;
+        }
+        
+        body:not(.dark-theme) .light-icon {
+            opacity: 1;
+        }
+        
+        body:not(.dark-theme) .dark-icon {
+            opacity: 0.3;
+        }
+
+        .theme-switch {
+            display: inline-block;
+            height: 34px;
+            position: relative;
+            width: 60px;
+        }
+
+        .theme-switch input {
+            display: none;
+        }
+
+        .slider {
+            background-color: #f0f0f0;
+            bottom: 0;
+            cursor: pointer;
+            left: 0;
+            position: absolute;
+            right: 0;
+            top: 0;
+            transition: .4s;
+            border-radius: 34px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 5px;
+        }
+
+        .slider:before {
+            background-color: white;
+            bottom: 4px;
+            content: "";
+            height: 26px;
+            left: 4px;
+            position: absolute;
+            transition: .4s;
+            width: 26px;
+            border-radius: 50%;
+            z-index: 2;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        input:checked + .slider {
+            background-color: var(--primary-color);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        .slider:after {
+            color: white;
+            display: block;
+            font-size: 10px;
+            font-weight: bold;
+            position: absolute;
+            right: 9px;
+            top: 9px;
+        }
+
+        .em {
+            color: var(--secondary-color);
+            font-style: normal;
+            font-weight: 600;
+        }
+
+        /* Hero Section */
+        .hero {
+            display: grid;
+            grid-template-columns: 1fr;
+            padding: 0;
+            position: relative;
+            overflow: hidden;
+            min-height: 100vh;
+        }
+
+        .hero-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--primary-color), #1e4261);
+            clip-path: polygon(0 0, 100% 0, 100% 70%, 0 100%);
+            z-index: -1;
+        }
+
+        .hero-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+            max-width: 1400px;
             margin: 0 auto;
             padding: 2rem;
+            align-items: center;
+        }
+
+        .hero-text {
+            padding-right: 2rem;
+        }
+
+        .hero-title {
+            font-size: 3.5rem;
+            margin: 0;
+            line-height: 1.1;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .hero-subtitle {
+            font-size: 1.5rem;
+            margin: 1rem 0 2rem;
+            color: rgba(255,255,255,0.9);
+            font-weight: 300;
+        }
+
+        .theme-fan-container {
+            position: relative;
+            height: 400px;
+            perspective: 1000px;
+            transform-style: preserve-3d;
+        }
+
+        .theme-deck {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+            transform-origin: center center;
+            transition: transform 0.1s ease-out;
+        }
+
+        .theme-card {
+            position: absolute;
+            width: 70%;
+            height: 80%;
+            top: 5%;
+            left: 15%;
+            backface-visibility: hidden;
+            transform-origin: center center;
+            border-radius: var(--radius);
+            overflow: hidden;
+            transition: all 0.5s ease;
+        }
+
+        .theme-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            border-radius: var(--radius);
+        }
+
+        .theme-card:nth-child(1) {
+            transform: translateZ(0px) translateY(0px) rotateZ(0deg);
+            z-index: 3;
+        }
+
+        .theme-card:nth-child(2) {
+            transform: translateZ(-5px) translateY(5px) rotateZ(0deg);
+            z-index: 2;
+        }
+
+        .theme-card:nth-child(3) {
+            transform: translateZ(-10px) translateY(10px) rotateZ(0deg);
+            z-index: 1;
+        }
+
+        .theme-fan-container.expanded .theme-card:nth-child(1) {
+            transform: translateX(-30%) translateY(15%) rotateZ(-25deg);
+        }
+
+        .theme-fan-container.expanded .theme-card:nth-child(2) {
+            transform: translateX(0%) translateY(0%) rotateZ(0deg);
+        }
+
+        .theme-fan-container.expanded .theme-card:nth-child(3) {
+            transform: translateX(30%) translateY(15%) rotateZ(25deg);
+        }
+        
+        .theme-fan-container:hover .theme-card:nth-child(1) {
+            transform: translateX(-30%) translateY(15%) rotateZ(-25deg);
+        }
+
+        .theme-fan-container:hover .theme-card:nth-child(2) {
+            transform: translateX(0%) translateY(0%) rotateZ(0deg);
+        }
+
+        .theme-fan-container:hover .theme-card:nth-child(3) {
+            transform: translateX(30%) translateY(15%) rotateZ(25deg);
+        }
+
+        @keyframes deck-shuffle {
+            0%, 100% {
+                transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg);
+            }
+            25% {
+                transform: rotateX(3deg) rotateY(5deg) rotateZ(-2deg);
+            }
+            50% {
+                transform: rotateX(0deg) rotateY(0deg) rotateZ(2deg);
+            }
+            75% {
+                transform: rotateX(-3deg) rotateY(-5deg) rotateZ(0deg);
+            }
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 0.8rem 1.8rem;
+            border-radius: var(--radius);
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+        }
+
+        .btn-primary {
+            background-color: var(--secondary-color);
+            color: #333;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+        }
+
+        .btn-secondary {
+            background-color: rgba(255,255,255,0.2);
+            color: white;
+            backdrop-filter: blur(5px);
+        }
+
+        .btn-secondary:hover {
+            background-color: rgba(255,255,255,0.3);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+        }
+
+        /* Features Section */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin: 1rem 0;
+            padding: 0 1rem;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .feature-block {
+            background-color: var(--card-bg);
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: calc(100vh - 4rem);
         }
-        
-        .header {
-            text-align: center;
-            margin-bottom: 2rem;
+
+        .feature-block:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
         }
-        
-        .logo {
-            width: 80px;
-            height: 80px;
-            margin-bottom: 1rem;
+
+        .feature-block-md {
+            grid-column: span 1;
         }
-        
-        h1 {
-            font-size: 2.5rem;
-            margin-bottom: 0.5rem;
-            color: #2c3e50;
-        }
-        
-        .tagline {
-            font-size: 1.2rem;
-            color: #7f8c8d;
-            margin-bottom: 2rem;
-        }
-        
-        .screenshot {
+
+        .feature-image {
             width: 100%;
-            max-width: 800px;
-            border-radius: 8px;
-            /*box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);*/
-            margin-bottom: 2rem;
+            height: 200px;
+            object-fit: cover;
         }
-        
-        .features {
-            display: flex;
-            justify-content: space-around;
-            flex-wrap: wrap;
-            margin-bottom: 2rem;
-            width: 100%;
-        }
-        
-        .feature {
-            background-color: white;
+
+        .feature-content {
             padding: 1.5rem;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-            margin: 1rem;
-            flex: 1;
-            min-width: 250px;
-            max-width: 300px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            justify-content: space-between;
         }
-        
-        .feature h3 {
-            color: #3498db;
-            margin-top: 0;
+
+        .feature-title {
+            font-size: 1.5rem;
+            margin: 0 0 0.5rem;
+            color: var(--primary-color);
         }
-        
-        .cta-button {
-            display: inline-block;
-            background-color: #3498db;
+
+        .feature-text {
+            margin: 0;
+            color: var(--text-color);
+            font-size: 0.95rem;
+        }
+
+        /* Mosaic Grid */
+        .mosaic-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            grid-auto-rows: minmax(100px, auto);
+            gap: 1rem;
+            margin: 1rem 0;
+            padding: 0 1rem;
+        }
+
+        .mosaic-item {
+            overflow: hidden;
+            border-radius: var(--radius);
+            position: relative;
+            box-shadow: var(--shadow);
+        }
+
+        .mosaic-item-1 {
+            grid-column: span 8;
+            grid-row: span 2;
+        }
+
+        .mosaic-item-2 {
+            grid-column: span 4;
+            grid-row: span 1;
+        }
+
+        .mosaic-item-3 {
+            grid-column: span 4;
+            grid-row: span 1;
+        }
+
+        .mosaic-item-4 {
+            grid-column: span 6;
+            grid-row: span 1;
+        }
+
+        .mosaic-item-5 {
+            grid-column: span 6;
+            grid-row: span 1;
+        }
+
+        .mosaic-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .mosaic-item:hover .mosaic-image {
+            transform: scale(1.05);
+        }
+
+        .mosaic-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+            padding: 1rem;
             color: white;
-            padding: 1rem 2rem;
-            border-radius: 4px;
-            text-decoration: none;
-            font-weight: bold;
+        }
+
+        .mosaic-title {
+            margin: 0;
             font-size: 1.2rem;
-            transition: background-color 0.3s;
-            margin-top: 1rem;
         }
-        
-        .cta-button:hover {
-            background-color: #2980b9;
+
+        /* Section Styles */
+        .section {
+            padding: 2rem 1rem;
+            margin-bottom: 0;
         }
-        
-        .footer {
+
+        .section-title {
+            font-size: 2rem;
             text-align: center;
-            margin-top: 2rem;
-            color: #7f8c8d;
-            font-size: 0.9rem;
+            margin: 0 0 0.5rem;
+            color: var(--primary-color);
+            position: relative;
+            padding-bottom: 0.5rem;
         }
-        
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background-color: var(--secondary-color);
+        }
+
+        .section-subtitle {
+            text-align: center;
+            margin: 0 auto 2rem;
+            max-width: 800px;
+            color: var(--text-color);
+            font-size: 1.1rem;
+            opacity: 0.8;
+        }
+
+        /* Tech Stack Section */
+        .tech-stack {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            margin: 2rem 0;
+            flex-wrap: wrap;
+        }
+
+        .tech-item {
+            text-align: center;
+            flex: 1;
+            min-width: 200px;
+            max-width: 300px;
+            background-color: var(--card-bg);
+            padding: 2rem;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            transition: transform 0.3s ease;
+        }
+
+        .tech-item:hover {
+            transform: translateY(-10px);
+        }
+
+        .tech-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+        }
+
+        .tech-name {
+            font-size: 1.5rem;
+            margin: 0 0 0.5rem;
+            color: var(--primary-color);
+        }
+
+        .tech-desc {
+            color: var(--text-color);
+            margin: 0;
+            font-size: 0.95rem;
+        }
+
+        /* Footer */
+        footer {
+            background-color: var(--dark-color);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .footer-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin: 1rem 0;
+        }
+
+        .footer-link {
+            color: var(--secondary-color);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .footer-link:hover {
+            color: white;
+        }
+
+        /* Theme specific image display */
+        body:not(.dark-theme) .dark-only {
+            display: none;
+        }
+
+        body.dark-theme .light-only {
+            display: none;
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .hero-content {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+
+            .hero-text {
+                padding-right: 0;
+                order: 2;
+            }
+
+            .theme-fan-container {
+                order: 1;
+                margin-bottom: 2rem;
+                height: 300px;
+            }
+
+            .hero-buttons {
+                justify-content: center;
+            }
+            
+            .hero-bg {
+                height: 115%;
+                clip-path: polygon(0 0, 100% 0, 100% 75%, 0 100%);
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .mosaic-item-1 {
+                grid-column: span 12;
+            }
+
+            .mosaic-item-2, .mosaic-item-3 {
+                grid-column: span 6;
+            }
+        }
+
         @media (max-width: 768px) {
-            .container {
-                padding: 1rem;
+            .hero-title {
+                font-size: 2.5rem;
             }
             
-            h1 {
-                font-size: 2rem;
+            .hero-content {
+                padding-top: 80px;
             }
             
-            .features {
-                flex-direction: column;
-                align-items: center;
+            .hero {
+                min-height: auto;
+                padding-bottom: 50px;
             }
             
-            .feature {
-                margin: 0.5rem 0;
-                min-width: auto;
-                width: 100%;
+            .hero-bg {
+                height: 120%;
+                clip-path: polygon(0 0, 100% 0, 100% 80%, 0 100%);
+            }
+            
+            .section {
+                padding-top: 3rem;
+            }
+
+            .feature-block-md {
+                grid-column: span 1;
+            }
+
+            .mosaic-item {
+                grid-column: span 12 !important;
+            }
+
+            .tech-item {
+                min-width: 100%;
             }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <img src="python-svgrepo-com.svg" alt="Python Logo" class="logo">
-            <h1>Online Python Editor</h1>
-            <p class="tagline">Write, run, and experiment with Python code directly in your browser</p>
-        </div>
-        
-        <img src="showcase.png" alt="Online Python Editor Screenshot" class="screenshot">
-        
-        <div class="features">
-            <div class="feature">
-                <h3>No Installation Required</h3>
-                <p>Run Python code instantly in your browser without installing anything. Powered by WebAssembly using Pyodide.</p>
-            </div>
-            <div class="feature">
-                <h3>Code Highlighting</h3>
-                <p>Full syntax highlighting and error reporting with the powerful Ace Editor for a familiar coding experience.</p>
-            </div>
-            <div class="feature">
-                <h3>Interactive Console</h3>
-                <p>Switch between run mode and interactive console for real-time experiments with your Python code.</p>
-            </div>
-        </div>
-        
-        <a href="py-editor.html" class="cta-button">Launch Python Editor</a>
-        
-        <div class="footer">
-            <p>Powered by Pyodide, Ace Editor, and Xterm.js. For educational and development purposes.</p>
-        </div>
+    <div class="theme-switch-wrapper">
+        <label class="theme-switch" for="theme-toggle">
+            <input type="checkbox" id="theme-toggle" />
+            <span class="slider">
+                <img src="docs/light-mode.svg" alt="Light Mode" class="theme-icon light-icon">
+                <img src="docs/dark-mode.svg" alt="Dark Mode" class="theme-icon dark-icon">
+            </span>
+        </label>
     </div>
+
+    <section class="hero">
+        <div class="hero-bg"></div>
+        <div class="hero-content">
+            <div class="hero-text">
+                <h1 class="hero-title">Online <em class="em">Python</em><br>Editor</h1>
+                <p class="hero-subtitle">Code, run, and debug Python directly in your browser. No installation. No server. Just code.</p>
+                <div class="hero-buttons">
+                    <a href="py-editor.html" class="btn btn-primary">Launch Editor</a>
+                    <a href="https://github.com/SteelDregg/online-python-editor" class="btn btn-secondary">GitHub</a>
+                </div>
+            </div>
+            <div class="theme-fan-container">
+                <div class="theme-deck">
+                    <div class="theme-card">
+                        <img src="docs/theme-light.png" alt="Light Theme">
+                    </div>
+                    <div class="theme-card">
+                        <img src="docs/theme-dark.png" alt="Dark Theme">
+                    </div>
+                    <div class="theme-card">
+                        <img src="docs/theme-darcula.png" alt="Darcula Theme">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2 class="section-title">Powerful Features</h2>
+        <p class="section-subtitle">Everything you need for seamless Python development, right in your browser</p>
+        
+        <div class="features-grid">
+            <div class="feature-block feature-block-md">
+                <img src="docs/console-darcula.png" alt="Interactive Console" class="feature-image dark-only">
+                <img src="docs/console-light.png" alt="Interactive Console" class="feature-image light-only">
+                <div class="feature-content">
+                    <div>
+                        <h3 class="feature-title">Interactive Console</h3>
+                        <p class="feature-text">Run Python commands and see output in real-time. Perfect for testing snippets, learning, and experimentation.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="feature-block feature-block-md">
+                <img  style="object-position: 100% 30%; width: 150%" src="docs/error-highlight-darcula.png" alt="Error Highlighting" class="feature-image dark-only">
+                <img  style="object-position: 100% 30%; width: 150%" src="docs/error-highlight-light.png" alt="Error Highlighting" class="feature-image light-only">
+                <div class="feature-content">
+                    <div>
+                        <h3 class="feature-title">Smart Error Detection</h3>
+                        <p class="feature-text">Instantly spot errors with inline highlighting. Debug faster with detailed error messages and line indicators.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="feature-block feature-block-md">
+                <img style="object-position: 100% 20%" src="docs/3-theme-together.png" alt="Multiple Themes" class="feature-image">
+                <div class="feature-content">
+                    <div>
+                        <h3 class="feature-title">Multiple Themes</h3>
+                        <p class="feature-text">Choose from Light, Dark, and Darcula themes to match your preferences and reduce eye strain.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="feature-block feature-block-md">
+                <img style="object-position: 100% 30%" src="docs/console-horizontal-darcula.png" alt="Flexible Layouts" class="feature-image dark-only">
+                <img style="object-position: 100% 30%" src="docs/console-horizontal-light.png" alt="Flexible Layouts" class="feature-image light-only">
+                <div class="feature-content">
+                    <div>
+                        <h3 class="feature-title">Flexible Layouts</h3>
+                        <p class="feature-text">Switch between horizontal and vertical layouts to customize your workspace.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2 class="section-title">How It Works</h2>
+        <p class="section-subtitle">Built with modern web technologies to deliver a seamless experience</p>
+        
+        <div class="tech-stack">
+            <div class="tech-item">
+                <div class="tech-icon">🐍</div>
+                <h3 class="tech-name">Pyodide</h3>
+                <p class="tech-desc">Python compiled to WebAssembly, running directly in your browser with near-native performance.</p>
+            </div>
+            
+            <div class="tech-item">
+                <div class="tech-icon">📝</div>
+                <h3 class="tech-name">Ace Editor</h3>
+                <p class="tech-desc">High-performance code editor for the web with syntax highlighting and error detection.</p>
+            </div>
+            
+            <div class="tech-item">
+                <div class="tech-icon">💻</div>
+                <h3 class="tech-name">Xterm.js</h3>
+                <p class="tech-desc">Terminal emulator for the web that provides a fully interactive console experience.</p>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="footer-content">
+            <p>Online Python Editor - Run Python code directly in your browser with no installation required.</p>
+            <div class="footer-links">
+                <a href="py-editor.html" class="footer-link">Launch Editor</a>
+                <a href="https://github.com/SteelDregg/online-python-editor" class="footer-link">GitHub</a>
+                <a href="https://pyodide.org" class="footer-link" target="_blank">Pyodide</a>
+                <a href="https://ace.c9.io" class="footer-link" target="_blank">Ace Editor</a>
+            </div>
+            <p>Made with ❤️ for Python enthusiasts everywhere</p>
+        </div>
+    </footer>
+
+    <script>
+        // Theme switcher
+        const themeToggle = document.getElementById('theme-toggle');
+        const body = document.body;
+        
+        // Check for saved theme preference or use preferred color scheme
+        const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+        const storedTheme = localStorage.getItem('theme');
+        
+        if (storedTheme === 'dark' || (!storedTheme && prefersDarkScheme.matches)) {
+            body.classList.add('dark-theme');
+            themeToggle.checked = true;
+        }
+        
+        // Theme toggle handler
+        themeToggle.addEventListener('change', function() {
+            if (this.checked) {
+                body.classList.add('dark-theme');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                body.classList.remove('dark-theme');
+                localStorage.setItem('theme', 'light');
+            }
+        });
+        
+        // Animation for features on scroll
+        const observerOptions = {
+            root: null,
+            rootMargin: '0px',
+            threshold: 0.1
+        };
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = 1;
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+        
+        document.querySelectorAll('.feature-block, .mosaic-item, .tech-item').forEach(item => {
+            item.style.opacity = 0;
+            item.style.transform = 'translateY(20px)';
+            item.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            observer.observe(item);
+        });
+        
+        // Mouse tilt effect for the card deck
+        const deckContainer = document.querySelector('.theme-fan-container');
+        const deck = document.querySelector('.theme-deck');
+        
+        // Add expanded class by default to show cards fanned out
+        deckContainer.classList.add('expanded');
+        
+        // Mouse move tilt effect
+        deckContainer.addEventListener('mousemove', (e) => {
+            const rect = deckContainer.getBoundingClientRect();
+            const x = e.clientX - rect.left; // x position within the element
+            const y = e.clientY - rect.top; // y position within the element
+            
+            // Calculate tilt angles based on mouse position
+            // Reduce the effect by dividing by higher numbers for subtlety
+            const tiltX = (y / rect.height - 0.5) * 10; // -5 to 5 degrees
+            const tiltY = -(x / rect.width - 0.5) * 10; // -5 to 5 degrees
+            
+            // Apply the tilt effect to the deck
+            deck.style.transform = `rotateX(${tiltX}deg) rotateY(${tiltY}deg)`;
+        });
+        
+        // Reset tilt when mouse leaves
+        deckContainer.addEventListener('mouseleave', () => {
+            deck.style.transform = 'rotateX(0deg) rotateY(0deg)';
+        });
+    </script>
 </body>
 </html>
