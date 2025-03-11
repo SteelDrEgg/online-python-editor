@@ -43,23 +43,8 @@ ace.define("ace/theme/custom", ["require", "exports", "module", "ace/lib/dom"], 
     .ace-custom .ace_marker-layer .ace_selected-word {
         border: 1px solid #B5D5FF
     }
-    .ace-custom .ace_constant.ace_language,.ace-custom .ace_keyword,.ace-custom .ace_meta,.ace-custom .ace_variable.ace_language {
-        color: #0232b3
-    }
     .ace-custom .ace_invisible {
         color: #BFBFBF
-    }
-    .ace-custom .ace_constant.ace_character,.ace-custom .ace_constant.ace_other {
-        color: #275A5E
-    }
-    .ace-custom .ace_constant.ace_numeric {
-        color: #194feb
-    }
-    .ace-custom .ace_entity.ace_other.ace_attribute-name,.ace-custom .ace_support.ace_constant {
-        color: #450084
-    }
-    .ace-custom .ace_support.ace_function {
-        color: #9e880e;
     }
     .ace-custom .ace_fold {
         background-color: #C800A4;
@@ -71,17 +56,53 @@ ace.define("ace/theme/custom", ["require", "exports", "module", "ace/lib/dom"], 
     .ace-custom .ace_storage {
         color: #C900A4
     }
-    .ace-custom .ace_string {
-        color: #037916
-    }
-    .ace-custom .ace_comment {
-        color: #8c8c8c
-    }
     .ace-custom .ace_indent-guide {
         background: url(data:image/png;
         base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAACCAYAAACZgbYnAAAAE0lEQVQImWP4////f4bLly//BwAmVgd1/w11/gAAAABJRU5ErkJggg==) right repeat-y
     }
     
+    .ace-custom .ace_python_docstring {
+        color: #8c8c8c;
+    }
+    .ace-custom .ace_python_comment {
+        color: #8c8c8c;
+    }
+    .ace-custom .ace_python_builtinfunc {
+        color: #010080;
+    }
+    .ace-custom .ace_python_number {
+        color: #194feb;
+    }
+    .ace-custom .ace_python_string {
+        color: #027d17;
+    }
+    .ace-custom .ace_python_comma {
+        color: #080808;
+    }
+    .ace-custom .ace_python_kwargs {
+        color: #660099;
+    }
+    .ace-custom .ace_python_types {
+        color: #660099;
+    }
+    .ace-custom .ace_python_funcname {
+        color: #00627a
+    }
+    .ace-custom .ace_python_dunder {
+        color: #b200b2
+    }
+    .ace-custom .ace_python_exception {
+        color: #010080
+    }
+    .ace-custom .ace_python_keyword {
+        color: #0232b3
+    }
+    .ace-custom .ace_python_decorator {
+        color: #9e880e
+    }
+    .ace_escape {
+        color: #0237a6 
+    }
 `; var r = e("../lib/dom"); r.importCssString(t.cssText, t.cssClass, !1)
 }); (function () {
     ace.require(["ace/theme/custom"], function (m) {

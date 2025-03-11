@@ -56,93 +56,64 @@ ace.define("ace/theme/custom_darcula", ["require", "exports", "module", "ace/lib
     border: 1px solid #373B41
 }
 
-.ace-custom_darcula .ace_invisible {
-    color: #4B4E55
-}
-
-.ace-custom_darcula .ace_keyword,
-.ace-custom_darcula .ace_meta,
-.ace-custom_darcula .ace_storage,
-.ace-custom_darcula .ace_storage.ace_type,
-.ace-custom_darcula .ace_support.ace_type {
-    color: #cc7832
-}
-
-.ace-custom_darcula .ace_constant.ace_character,
-.ace-custom_darcula .ace_constant.ace_language,
-.ace-custom_darcula .ace_constant.ace_numeric,
-.ace-custom_darcula .ace_keyword.ace_other.ace_unit,
-.ace-custom_darcula .ace_support.ace_constant,
-.ace-custom_darcula .ace_variable.ace_parameter {
-    color: #6897bb
-}
-
-.ace-custom_darcula .ace_constant.ace_other {
-    color: #CED1CF
-}
-
-.ace-custom_darcula .ace_invalid {
-    color: #CED2CF;
-    background-color: #DF5F5F
-}
-
-.ace-custom_darcula .ace_invalid.ace_deprecated {
-    color: #CED2CF;
-    background-color: #B798BF
-}
-
 .ace-custom_darcula .ace_fold {
     background-color: #81A2BE;
     border-color: #C5C8C6
 }
 
-.ace-custom_darcula .ace_entity.ace_name.ace_function,
-.ace-custom_darcula .ace_variable {
-    color: #81A2BE
-}
-
-/* variable type notation */
-[class="ace_support ace_function"] {
-    color: #8888c6 !important;
-}
-/* class */
-[class="ace_variable ace_language"] {
-    color: #94558d !important;
-}
-
-.ace-custom_darcula .ace_support.ace_class,
-.ace-custom_darcula .ace_support.ace_type {
-    color: #F0C674
-}
-
-.ace-custom_darcula .ace_heading,
-.ace-custom_darcula .ace_markup.ace_heading,
-.ace-custom_darcula .ace_string {
-    color: #6a8759
-}
-
-.ace-custom_darcula .ace_entity.ace_name.ace_tag,
-.ace-custom_darcula .ace_entity.ace_other.ace_attribute-name,
-.ace-custom_darcula .ace_meta.ace_tag,
-.ace-custom_darcula .ace_string.ace_regexp,
-.ace-custom_darcula .ace_variable {
-    color: #e8bf6a
-}
-
-.ace-custom_darcula .ace_comment {
-    color: #969896
-}
-
-/* default */
-.ace-custom_darcula .ace_keyword.ace_operator,
-.ace-custom_darcula .ace_function.ace_support,
-.ace-custom_darcula .ace_identifier {
-    color: #a9b7c6
-}
-
 .ace-custom_darcula .ace_indent-guide {
     background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAACCAYAAACZgbYnAAAAEklEQVQImWNgYGBgYHB3d/8PAAOIAdULw8qMAAAAAElFTkSuQmCC) right repeat-y
-}`;
+}
+
+.ace-custom_darcula .ace_python_docstring {
+    color: #629755;
+}
+
+.ace-custom_darcula .ace_python_comment {
+    color: #808080;
+}
+
+.ace-custom_darcula .ace_python_exception,
+.ace-custom_darcula .ace_python_builtinfunc {
+    color: #8888c6;
+}
+
+.ace-custom_darcula .ace_python_number {
+    color: #6897ba;
+}
+
+.ace-custom_darcula .ace_python_string {
+    color: #6a8759;
+}
+
+.ace-custom_darcula .ace_python_comma {
+    color: #cc7832;
+}
+
+.ace-custom_darcula .ace_python_kwargs {
+    color: #aa4926;
+}
+
+.ace-custom_darcula .ace_python_funcname {
+    color: #ffc66d;
+}
+
+.ace-custom_darcula .ace_python_dunder {
+    color: #b200b2;
+}
+
+.ace-custom_darcula .ace_python_keyword {
+    color: #cc7832;
+}
+
+.ace-custom_darcula .ace_python_decorator {
+    color: #bbb52a;
+}
+
+.ace-custom_darcula .ace_escape {
+    color: #b46a2c
+}
+`;
     var r = e("../lib/dom");
     r.importCssString(t.cssText, t.cssClass, !1)
 });
