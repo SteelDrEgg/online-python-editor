@@ -72,9 +72,6 @@ To run locally:
 ```
 # Using Python's built-in HTTP server
 python -m http.server 8000
-
-# Or alternatively, use the included simple server
-python simpleServer.py
 ```
 
 Then open `http://localhost:8000/py-editor.html` in your browser.
