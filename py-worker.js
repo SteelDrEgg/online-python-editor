@@ -41,6 +41,8 @@ self.onmessage = async function (event) {
         dialog = [];
         try {
             pyodide.runPython(event.data.payload);
+            // Fix no output issue
+            pyodide.runPython("print()");
             for (let ele of dialog) {
                 result += ele + "\n";
             }
